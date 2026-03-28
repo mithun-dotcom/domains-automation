@@ -93,13 +93,15 @@ async function runPipeline(jobId, domains, options) {
       const created = result.records.filter(r => r.success && !r.skipped).length;
       const skipped = result.records.filter(r => r.skipped).length;
       const failed  = result.records.filter(r => !r.success);
+      const deleted = (result.deleted || []).filter(r => r.success && r.deleted).length;
 
       updateDomain(jobId, domain, {
         status: failed.length === 0 ? 'done' : 'partial',
         message: failed.length === 0
-          ? `${created} records created, ${skipped} already existed`
+          ? `${deleted > 0 ? `${deleted} old records removed, ` : ''}${created} records created`
           : `${created} created — ${failed.length} failed`,
-        records: result.records
+        records: result.records,
+        deleted: result.deleted || []
       });
 
       for (const f of failed) {

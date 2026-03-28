@@ -129,11 +129,6 @@ async function setupDNS(domain, options = {}) {
   const delDMARC = await deleteExisting(zoneId, 'TXT', dmarcName, existing);
   deletedResults.push(...delDMARC.map(d => ({ ...d, label: 'DMARC (old)' })));
 
-  // Delete existing DKIM TXT (google._domainkey.domain)
-  const dkimName = `google._domainkey.${domain}`;
-  const delDKIM = await deleteExisting(zoneId, 'TXT', dkimName, existing);
-  deletedResults.push(...delDKIM.map(d => ({ ...d, label: 'DKIM (old)' })));
-
   // Delete existing www CNAME
   const delWWW = await deleteExisting(zoneId, 'CNAME', `www.${domain}`, existing);
   deletedResults.push(...delWWW.map(d => ({ ...d, label: 'www CNAME (old)' })));
@@ -172,13 +167,6 @@ async function setupDNS(domain, options = {}) {
   results.push(await addRecord(zoneId, {
     type: 'TXT', name: `_dmarc.${domain}`,
     content: `v=DMARC1; p=quarantine; rua=mailto:postmaster@${domain}; fo=1`,
-    ttl: 3600
-  }));
-
-  // DKIM placeholder
-  results.push(await addRecord(zoneId, {
-    type: 'TXT', name: `google._domainkey.${domain}`,
-    content: 'v=DKIM1; k=rsa; p=REPLACE_WITH_YOUR_DKIM_KEY',
     ttl: 3600
   }));
 
